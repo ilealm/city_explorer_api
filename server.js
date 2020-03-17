@@ -11,6 +11,7 @@ app.use(cors());
 require('dotenv').config();
 const PORT = process.env.PORT || 3001;  // setting the listening port
 
+// LOCATION PART
 // get the data from the front end
 app.get('/location',(request, response) => {
   try{
@@ -28,7 +29,6 @@ app.get('/location',(request, response) => {
 })
 
 // create the Location object
-
 function Location(obj, city){
   this.search_query = city;
   this.formated_query = obj.display_name;
@@ -36,12 +36,36 @@ function Location(obj, city){
   this.longitude = obj.lon;
 }
 
-{
-  /*
-  in the example on trello, the format is <> than the file
-  "latitude": "47.606210",
-  "longitude": "-122.332071"*/
+// WEATHER PART
+// get the data from the front end
+app.get('/weather',(request, response) => {
+  try{
+    //get data from darksky.json
+    let weatherData = require('./data/darksky.json');
+    // let weather = new Weather(weatherData[0], city);
+    // we need to 
+    let arrAllweather =[];
+    
+    weatherData.daily.data.forEach(weatherElement => {
+      arrAllweather.push(new Weather(weatherElement));
+    })
+
+    // let weather = new Weather(weatherData.currently);
+    response.send(arrAllweather); // here is where we have to send an araray of objects
+
+  }
+  catch(err){
+    console.error(err);
+  }
+})
+
+// create the Location object
+function Weather(obj){
+  this.time = new Date(obj.time * 1000).toString().slice(0, 15);
+  this.forecast = obj.summary;
 }
+  
+
 
 // If page not found:
 app.get('*',(request,response)=>{
