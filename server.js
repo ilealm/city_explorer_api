@@ -2,12 +2,13 @@
 const express = require('express');
 require('dotenv').config();  //here we dont asing it to a variable :. we dont interact w. it. Just use it
 const cors =  require('cors');
-// here superagent = requeire('superagent); //todo: intall it on terminal
+const superAgent = require('superagent'); //todo: intall it on terminal
 
 
 // GLOBAL VARIABLES
 const app = express();
 const PORT = process.env.PORT || 3001; // setting the listening port. TODO: ADDED TO HEROKU
+
 
 // MIDDLEWARE
 app.use(cors()); //use is to register a middleware function
@@ -15,17 +16,28 @@ app.use(errorIrisRulesTheWorld); //to tell express to use this function. Is for 
 
 ////////  ROUTE HANDLERS
 // LOCATION PART
-// get the data from the front end
+// get the data from (file | API) and send it the front end
 app.get('/location',(request, response) => {
   let city = request.query.city;
   if ((city === '') || (city === null))
     throw 'Not a valid city';
   console.log('You requested on city: ', city);
-
-  //get data from geo.json
-  let geo = require('./data/geo.json');
-  let location = new Location(geo[0], city);
-  response.send(location);
+  // console.log('geoKey: ', process.env.GEOCODE_API_KEY);
+  // create url from where we are getting the data using superagent API
+  let url = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE_API_KEY}&q=${city}&format=json`;
+  superAgent.get(url)
+    .then(superAgentResults =>{
+      console.log(superAgentResults.body[0]);
+      let location = new Location(superAgentResults.body[0]);
+      response.send(location);
+    })
+    .catch(err => console.log(err));
+  // THIS WORKS PERFECT, BUT REACH FOR INFO IN A FILE INSTED USING AN API
+  // //get data from geo.json file
+  // let geo = require('./data/geo.json');
+  // let location = new Location(geo[0], city);
+  // response.send(location);
+  // Get data from iqLocations using superAgent to handle the info
 })
 
 // create the Location object
@@ -55,6 +67,7 @@ function Weather(obj){
   this.forecast = obj.summary;
 }
 
+// 
 
 
 // If page not found:
