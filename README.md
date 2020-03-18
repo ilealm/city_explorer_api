@@ -19,11 +19,29 @@
 ## Credits and Collaborations
 <!-- Give credit (and a link) to other people or resources that helped you build this application. -->
 
-# Number and name of feature: Lab06
+# Number and name of feature: Lab06 cards 1-3
 Estimate of time needed to complete: 5h
 
 Start time: 9:50
 
-Finish time: _____
+Finish time: 1:40pm
 
-Actual time needed to complete: _____
+Actual time needed to complete: 4h
+
+# Number and name of feature: Lab06 card 4
+Estimate of time needed to complete: 30m
+
+Start time: 5:50PM
+
+Finish time: 6:30
+
+Actual time needed to complete: 40
+
+# Number and name of feature: Lab07 cards 1
+Estimate of time needed to complete: 5h
+
+Start time: 9:50
+
+Finish time: 1:40pm
+
+Actual time needed to complete: 4h
