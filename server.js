@@ -1,17 +1,17 @@
-// libraries
-
-// declare package to use
-const cors =  require('cors');
+// framework(analogy: hollywood principle) / libraries
 const express = require('express');
+require('dotenv').config();  //here we dont asing it to a variable :. we dont interact w. it. Just use it
+const cors =  require('cors');
+// here superagent = requeire('superagent); //todo: intall it on terminal
+
+
+// GLOBAL VARIABLES
 const app = express();
+const PORT = process.env.PORT || 3001; // setting the listening port. TODO: ADDED TO HEROKU
 
-
+// MIDDLEWARE
 app.use(cors()); //use is to register a middleware function
 app.use(errorIrisRulesTheWorld); //to tell express to use this function. Is for error handling. 
-
-// get variables from .env
-require('dotenv').config();
-const PORT = process.env.PORT || 3001; // setting the listening port
 
 ////////  ROUTE HANDLERS
 // LOCATION PART
