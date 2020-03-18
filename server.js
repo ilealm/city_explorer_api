@@ -51,14 +51,29 @@ function Location(obj, city){
 
 // WEATHER PART
 app.get('/weather',(request, response) => {
-  let weatherData = require('./data/darksky.json'); //get the info from the json file
-  if ((weatherData === '') || (weatherData === null))
-    throw 'Not a valid weather';
-  let arrAllweather = weatherData.daily.data.map(weatherElement =>{
-    return (new Weather(weatherElement));
-  });
 
-  response.send(arrAllweather); // here is where we have to send an araray of objects
+  // obtaining the info from darkSkyAPI using superagent
+  let url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.latitude},${request.query.longitude}`;
+  // console.log(url);
+  superAgent.get(url)
+    .then(superAgentResults =>{
+      console.log(superAgentResults.body.daily.data);
+      let arrAllweather = superAgentResults.body.daily.data.map(weatherElement =>{
+        return (new Weather(weatherElement));
+      });
+      response.send(arrAllweather); // here is where we have to send an araray of objects
+    })
+    .catch(err => console.log(err));
+
+  // this ways return info from a json 
+  // let weatherData = require('./data/darksky.json'); //get the info from the json file
+  // if ((weatherData === '') || (weatherData === null))
+  //   throw 'Not a valid weather';   
+  // let arrAllweather = weatherData.daily.data.map(weatherElement =>{
+  //   return (new Weather(weatherElement));
+  // });
+
+  // response.send(arrAllweather); // here is where we have to send an araray of objects
 })
 
 // create the Location object
