@@ -71,6 +71,7 @@ function errorIrisRulesTheWorld (err, req, res, next) {
     return next(err)
   }
   res.status(500).send({ status: 500, responseText: 'Sorry, something went wrong' })
+  //res.send({ status: 500, responseText: 'Sorry, something went wrong' })
 }
 
 
