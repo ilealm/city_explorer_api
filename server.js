@@ -39,15 +39,12 @@ function Location(obj, city){
 
 // WEATHER PART
 app.get('/weather',(request, response) => {
-  let weatherData = require('./data/darksky.json');
+  let weatherData = require('./data/darksky.json'); //get the info from the json file
   if ((weatherData === '') || (weatherData === null))
     throw 'Not a valid weather';
-
-  let arrAllweather =[];
-  weatherData.daily.data.forEach(weatherElement => {
-    arrAllweather.push(new Weather(weatherElement));
-  })
-
+  let arrAllweather = weatherData.daily.data.map(weatherElement =>{
+    return (new Weather(weatherElement));
+  });
 
   response.send(arrAllweather); // here is where we have to send an araray of objects
 })
