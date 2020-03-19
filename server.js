@@ -1,3 +1,4 @@
+
 // framework(analogy: hollywood principle) / libraries
 const express = require('express');
 // access all hidden variables
@@ -30,6 +31,20 @@ app.get('/location',(request, response) => {
   if ((city === '') || (city === null))
     throw 'Not a valid city';
   console.log('You requested on city: ', city);
+
+  // review if city exists in table locations, if so, we retrieve the info
+  let cityObj = getCityInfo(city);
+  console.log('Retrieveing city info from BD');
+  console.log(cityObj);
+  if (cityObj === null)
+  {
+    console.log('the city is NOT in BD')
+  }
+  else{
+    console.log('the city IS in BD')
+  }
+
+  // if the location does't exist in the table locations
   // console.log('geoKey: ', process.env.GEOCODE_API_KEY);
   // create url from where we are getting the data using superagent API
   let url = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE_API_KEY}&q=${city}&format=json`;
@@ -37,6 +52,8 @@ app.get('/location',(request, response) => {
     .then(superAgentResults =>{
       console.log(superAgentResults.body[0]);
       let location = new Location(superAgentResults.body[0]);
+      console.log(Location);
+      // try insert in table
       response.send(location);
     })
     .catch(err => console.log(err));
@@ -117,21 +134,22 @@ function Trail(obj){
 }
 
 
-/*
-{
-    "name": "Rattlesnake Ledge";
-    "location": "Riverbend, Washington",
-    "length": "4.3",
-    "stars": "4.4",
-    "star_votes": "84",
-    "summary": "An extremely popular out-and-back hike to the viewpoint on Rattlesnake Ledge.",
-    "trail_url": "https://www.hikingproject.com/trail/7021679/rattlesnake-ledge",
-    "conditions": "Dry: The trail is clearly marked and well maintained.",
-    "condition_date": "2018-07-21",
-    "condition_time": "0:00:00 "
-  },
-*/
+function getCityInfo(city){ 
+  var sql = `SELECT * FROM locations WHERE search_query = "${city}";`;
+  console.log(sql);
+  // return client.query(sql).then().catch();
+}
 
+
+
+//start the server. if is on, :. turn on port to listeting
+client.connect()
+  .then( () =>{
+    // Turn on the server to listening
+    app.listen(PORT, () =>{
+      console.log(`listening on port ${PORT}`);
+    })
+  });
 
 // If page not found:
 // turn this app.get into a function, the function is going to return a response status 
@@ -152,13 +170,3 @@ function errorIrisRulesTheWorld (err, req, res, next) {
 app.get('*',(request,response)=>{
   response.status(500).send('I could not find the page you are looking for'); // the function is going to return this line
 });
-
-//start the server. if is on, :. turn on port to listeting
-client.connect()
-  .then( () =>{
-    // Turn on the server to listening
-    app.listen(PORT, () =>{
-      console.log(`listening on port ${PORT}`);
-    })
-  });
-
