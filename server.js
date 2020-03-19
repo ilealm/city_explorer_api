@@ -93,9 +93,7 @@ app.get('/trails',(request, response) => {
   superAgent.get(url)
     .then(superAgentResults => {
       console.log(superAgentResults.body.trails[0].name);
-      let arrAllTrails = superAgentResults.body.trails.map(trail => {
-        return new Trail(trail);
-      })
+      let arrAllTrails = superAgentResults.body.trails.map(trail => new Trail(trail));
       response.send(arrAllTrails);
     })
     .catch(err => console.log(err));

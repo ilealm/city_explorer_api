@@ -63,8 +63,8 @@ Actual time needed to complete: 1.25h
 
 # Number and name of feature: Lab07 cards 4
 Estimate of time needed to complete: 
-Start time: 1:25 - 1:45, 5:35
+Start time: 1:25 - 1:45, 5:35 - 6:25
 
-Finish time: 
+Finish time:
 
-Actual time needed to complete: 
+Actual time needed to complete:  1.10
