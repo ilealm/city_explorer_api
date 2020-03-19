@@ -62,9 +62,27 @@ Finish time: 1:15pm
 Actual time needed to complete: 1.25h
 
 # Number and name of feature: Lab07 cards 4
-Estimate of time needed to complete: 
+Estimate of time needed to complete: 1.20
 Start time: 1:25 - 1:45, 5:35 - 6:25
 
 Finish time:
 
 Actual time needed to complete:  1.10
+
+# Number and name of feature: Lab08 card 1
+
+Estimate of time needed to complete: 45
+Start time: 10:00
+
+Finish time: 12:10
+
+Actual time needed to complete:  2.10
+
+# Number and name of feature: Lab08 card 2
+
+Estimate of time needed to complete: 1:30
+Start time: 12:20
+
+Finish time: 
+
+Actual time needed to complete: 

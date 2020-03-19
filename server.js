@@ -1,9 +1,16 @@
+
 // framework(analogy: hollywood principle) / libraries
 const express = require('express');
-// access all hidden variablas
-require('dotenv').config();  //here we dont asing it to a variable :. we dont interact w. it. Just use it
+// access all hidden variables
+require('dotenv').config(); //here we dont asing it to a variable :. we dont interact w. it. Just use it
 const cors =  require('cors');
 const superAgent = require('superagent'); //todo: intall it on terminal
+const pg = require('pg');
+
+// DATABASE CONECCTION TO POSTGRES
+const client = new pg.Client(process.env.DATABASE_URL);
+client.on('error', err => console.log(err));
+
 
 
 // GLOBAL VARIABLES
@@ -24,6 +31,20 @@ app.get('/location',(request, response) => {
   if ((city === '') || (city === null))
     throw 'Not a valid city';
   console.log('You requested on city: ', city);
+
+  // review if city exists in table locations, if so, we retrieve the info
+  let cityObj = getCityInfo(city);
+  console.log('Retrieveing city info from BD');
+  console.log(cityObj);
+  if (cityObj === null)
+  {
+    console.log('the city is NOT in BD')
+  }
+  else{
+    console.log('the city IS in BD')
+  }
+
+  // if the location does't exist in the table locations
   // console.log('geoKey: ', process.env.GEOCODE_API_KEY);
   // create url from where we are getting the data using superagent API
   let url = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE_API_KEY}&q=${city}&format=json`;
@@ -31,6 +52,8 @@ app.get('/location',(request, response) => {
     .then(superAgentResults =>{
       console.log(superAgentResults.body[0]);
       let location = new Location(superAgentResults.body[0]);
+      console.log(Location);
+      // try insert in table
       response.send(location);
     })
     .catch(err => console.log(err));
@@ -56,10 +79,8 @@ app.get('/weather',(request, response) => {
 
   // obtaining the info from darkSkyAPI using superagent
   let url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.latitude},${request.query.longitude}`;
-  // console.log(url);
   superAgent.get(url)
     .then(superAgentResults =>{
-      console.log(superAgentResults.body.daily.data);
       let arrAllweather = superAgentResults.body.daily.data.map(weatherElement =>{
         return (new Weather(weatherElement));
       });
@@ -87,16 +108,16 @@ function Weather(obj){
 
 //TRAILS PART
 app.get('/trails',(request, response) => {
-  console.log('now in Trails');
   let url =`https://www.hikingproject.com/data/get-trails?lat=${request.query.latitude}&lon=${request.query.longitude}&maxDistance=10&key=${process.env.TRAIL_API_KEY}`;
-  console.log('URL', url);
   superAgent.get(url)
     .then(superAgentResults => {
-      console.log(superAgentResults.body.trails[0].name);
       let arrAllTrails = superAgentResults.body.trails.map(trail => new Trail(trail));
-      response.send(arrAllTrails);
+      response.status(200).send(arrAllTrails);
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      console.log(err)
+      response.status(500).send(err);
+    });
 })
 
 function Trail(obj){
@@ -110,25 +131,25 @@ function Trail(obj){
   this.conditions = obj.conditionStatus;
   this.condition_date = new Date(obj.conditionDate).toString().slice(0, 15);
   this.condition_time = new Date(obj.conditionDate).toString().slice(16,25);
-  // new Date(obj.conditionDate).toString().slice(0, 11);
 }
 
 
-/*
-{
-    "name": "Rattlesnake Ledge";
-    "location": "Riverbend, Washington",
-    "length": "4.3",
-    "stars": "4.4",
-    "star_votes": "84",
-    "summary": "An extremely popular out-and-back hike to the viewpoint on Rattlesnake Ledge.",
-    "trail_url": "https://www.hikingproject.com/trail/7021679/rattlesnake-ledge",
-    "conditions": "Dry: The trail is clearly marked and well maintained.",
-    "condition_date": "2018-07-21",
-    "condition_time": "0:00:00 "
-  },
-*/
+function getCityInfo(city){ 
+  var sql = `SELECT * FROM locations WHERE search_query = "${city}";`;
+  console.log(sql);
+  // return client.query(sql).then().catch();
+}
 
+
+
+//start the server. if is on, :. turn on port to listeting
+client.connect()
+  .then( () =>{
+    // Turn on the server to listening
+    app.listen(PORT, () =>{
+      console.log(`listening on port ${PORT}`);
+    })
+  });
 
 // If page not found:
 // turn this app.get into a function, the function is going to return a response status 
@@ -149,8 +170,3 @@ function errorIrisRulesTheWorld (err, req, res, next) {
 app.get('*',(request,response)=>{
   response.status(500).send('I could not find the page you are looking for'); // the function is going to return this line
 });
-
-// Turn on the server to listening
-app.listen(PORT, () =>{
-  console.log(`listening on port ${PORT}`);
-})
