@@ -1,5 +1,6 @@
 // framework(analogy: hollywood principle) / libraries
 const express = require('express');
+// access all hidden variablas
 require('dotenv').config();  //here we dont asing it to a variable :. we dont interact w. it. Just use it
 const cors =  require('cors');
 const superAgent = require('superagent'); //todo: intall it on terminal
@@ -17,6 +18,7 @@ app.use(errorIrisRulesTheWorld); //to tell express to use this function. Is for 
 ////////  ROUTE HANDLERS
 // LOCATION PART
 // get the data from (file | API) and send it the front end
+// the endpoint lives un the URL last part
 app.get('/location',(request, response) => {
   let city = request.query.city;
   if ((city === '') || (city === null))
@@ -82,7 +84,50 @@ function Weather(obj){
   this.forecast = obj.summary;
 }
 
-// 
+
+//TRAILS PART
+app.get('/trails',(request, response) => {
+  console.log('now in Trails');
+  let url =`https://www.hikingproject.com/data/get-trails?lat=${request.query.latitude}&lon=${request.query.longitude}&maxDistance=10&key=${process.env.TRAIL_API_KEY}`;
+  console.log('URL', url);
+  superAgent.get(url)
+    .then(superAgentResults => {
+      console.log(superAgentResults.body.trails[0].name);
+      let arrAllTrails = superAgentResults.body.trails.map(trail => new Trail(trail));
+      response.send(arrAllTrails);
+    })
+    .catch(err => console.log(err));
+})
+
+function Trail(obj){
+  this.name = obj.name;
+  this.location = obj.location;
+  this.length = obj.length;
+  this.stars = obj.stars;
+  this.star_votes = obj.starVotes;
+  this.summary = obj.summary;
+  this.trail_url = obj.url;
+  this.conditions = obj.conditionStatus;
+  this.condition_date = new Date(obj.conditionDate).toString().slice(0, 15);
+  this.condition_time = new Date(obj.conditionDate).toString().slice(16,25);
+  // new Date(obj.conditionDate).toString().slice(0, 11);
+}
+
+
+/*
+{
+    "name": "Rattlesnake Ledge";
+    "location": "Riverbend, Washington",
+    "length": "4.3",
+    "stars": "4.4",
+    "star_votes": "84",
+    "summary": "An extremely popular out-and-back hike to the viewpoint on Rattlesnake Ledge.",
+    "trail_url": "https://www.hikingproject.com/trail/7021679/rattlesnake-ledge",
+    "conditions": "Dry: The trail is clearly marked and well maintained.",
+    "condition_date": "2018-07-21",
+    "condition_time": "0:00:00 "
+  },
+*/
 
 
 // If page not found:
@@ -101,9 +146,9 @@ function errorIrisRulesTheWorld (err, req, res, next) {
 
 
 
-// app.get('*',(request,response)=>{
-//   response.status(500).send('I could not find the page you are looking for'); // the function is going to return this line
-// });
+app.get('*',(request,response)=>{
+  response.status(500).send('I could not find the page you are looking for'); // the function is going to return this line
+});
 
 // Turn on the server to listening
 app.listen(PORT, () =>{
