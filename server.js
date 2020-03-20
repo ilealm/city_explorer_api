@@ -1,4 +1,4 @@
-
+'use strict';
 // framework(analogy: hollywood principle) / libraries
 const express = require('express');
 // access all hidden variables
@@ -30,7 +30,7 @@ app.get('/location',(request, response) => {
   let city = request.query.city.toLowerCase();
   if ((city === '') || (city === null))
     throw 'Not a valid city';
-  console.log('You requested on city: ', city);
+  // console.log('You requested on city: ', city);
 
   // review if city exists in table locations, if so, we retrieve the info
   var sql = 'SELECT * FROM locations WHERE search_query =$1';
@@ -38,24 +38,24 @@ app.get('/location',(request, response) => {
   client.query(sql,safeValues)
     .then(results =>{
       if (results.rows.length>0) {
-        console.log ('I found the city on the data base');
-        console.log ('and this is the info to display');
-        console.log (results.rows[0]);
+        // console.log ('I found the city on the data base');
+        // console.log ('and this is the info to display');
+        // console.log (results.rows[0]);
         response.send(results.rows[0]);
       }
       else {
-        console.log ('I DO NOT found the city on the data base');
+        // console.log ('I DO NOT found the city on the data base');
         // if the location does't exist in the table locations, geting data using superagent API
         let url = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE_API_KEY}&q=${city}&format=json`;
         superAgent.get(url)
           .then(superAgentResults =>{
             let location = new Location(superAgentResults.body[0],city);
-            console.log(location);
+            // console.log(location);
             // try insert in table
             sql = 'INSERT INTO locations (search_query, formatted_query, latitude,longitude) VALUES ($1, $2, $3, $4);';
             safeValues = [location.search_query, location.search_query, location.latitude, location.longitude];
-            console.log('Now inserting these values into DB');
-            console.log(sql,safeValues);
+            // console.log('Now inserting these values into DB');
+            // console.log(sql,safeValues);
             client.query(sql,safeValues);
             response.status(200).send(location);
           })
@@ -125,6 +125,43 @@ function Trail(obj){
 
 
 
+//MOVIES PART
+app.get('/movies',(request,response) =>{
+  let url =`https://api.themoviedb.org/3/movie/550?api_key=${process.env.MOVIE_API_KEY}`;
+  superAgent.get(url)
+    .then(superAgentResults =>{
+      console.log('In movies');
+      console.log(superAgentResults.body);
+      let movie = new Movies(superAgentResults.body);
+      console.log('Created movie obj', movie);
+      response.status(200).send(movie);
+    })
+    .catch(err =>{
+      console.log(err);
+      response.status(500).send(err);
+    });
+})
+
+function Movies(obj){
+  this.title =  obj.original_title; //Sleepless in Seattle",
+  this.overview =  obj.overview; //A young boy who tries to set his dad up on a date after the death of his mother. He calls into a radio station to talk about his dad’s loneliness which soon leads the dad into meeting a Journalist Annie who flies to Seattle to write a story about the boy and his dad. Yet Annie ends up with more than just a story in this popular romantic comedy.",
+  this.average_votes =  obj.vote_average; //6.60",
+  this.total_votes =  obj.vote_count; //881",
+  this.image_url =  obj.poster_path; //https://image.tmdb.org/t/p/w500/afkYP15OeUOD0tFEmj6VvejuOcz.jpg",
+  this.popularity =  obj.popularity; //8.2340",
+  this.released_on =  obj.release_date; //1993-06-24"
+}
+
+
+// {
+//   "title": "Sleepless in Seattle",
+//   "overview": "A young boy who tries to set his dad up on a date after the death of his mother. He calls into a radio station to talk about his dad’s loneliness which soon leads the dad into meeting a Journalist Annie who flies to Seattle to write a story about the boy and his dad. Yet Annie ends up with more than just a story in this popular romantic comedy.",
+//   "average_votes": "6.60",
+//   "total_votes": "881",
+//   "image_url": "https://image.tmdb.org/t/p/w500/afkYP15OeUOD0tFEmj6VvejuOcz.jpg",
+//   "popularity": "8.2340",
+//   "released_on": "1993-06-24"
+// },
 
 
 //start the server. if is on, :. turn on port to listeting
