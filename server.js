@@ -27,22 +27,32 @@ app.use(errorIrisRulesTheWorld); //to tell express to use this function. Is for 
 // get the data from (file | API) and send it the front end
 // the endpoint lives un the URL last part
 app.get('/location',(request, response) => {
-  let city = request.query.city;
+  let city = request.query.city; //TODO: toLowerCases
   if ((city === '') || (city === null))
     throw 'Not a valid city';
   console.log('You requested on city: ', city);
 
   // review if city exists in table locations, if so, we retrieve the info
-  let cityObj = getCityInfo(city);
-  console.log('Retrieveing city info from BD');
-  console.log(cityObj);
-  if (cityObj === null)
-  {
-    console.log('the city is NOT in BD')
-  }
-  else{
-    console.log('the city IS in BD')
-  }
+  var sql = 'SELECT * FROM locations WHERE search_query =$1';
+  let safeValues = [city];
+  client.query(sql,safeValues)
+    .then(results =>{
+      if (results.rows.length>0) {
+        console.log ('I found the city on the data base');
+      }
+      else {
+        console.log ('I DO NOT found the city on the data base');
+      }
+    })
+//   console.log(sql);
+//   return client.query(sql);
+//   // return client.query(sql).then().catch();
+  
+
+
+  // console.log('Retrieveing city info from BD');
+  // console.log('test',cityObj);
+
 
   // if the location does't exist in the table locations
   // console.log('geoKey: ', process.env.GEOCODE_API_KEY);
@@ -50,9 +60,10 @@ app.get('/location',(request, response) => {
   let url = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE_API_KEY}&q=${city}&format=json`;
   superAgent.get(url)
     .then(superAgentResults =>{
-      console.log(superAgentResults.body[0]);
+      console.log(superAgentResults.body[0],'line 54');
+
       let location = new Location(superAgentResults.body[0]);
-      console.log(Location);
+      console.log(location);
       // try insert in table
       response.send(location);
     })
@@ -67,7 +78,7 @@ app.get('/location',(request, response) => {
 
 // create the Location object
 function Location(obj, city){
-  this.search_query = city;
+  this.search_query = city; //TODO: toLowerCases
   this.formatted_query = obj.display_name;
   this.latitude = obj.lat;
   this.longitude = obj.lon;
@@ -134,11 +145,12 @@ function Trail(obj){
 }
 
 
-function getCityInfo(city){ 
-  var sql = `SELECT * FROM locations WHERE search_query = "${city}";`;
-  console.log(sql);
-  // return client.query(sql).then().catch();
-}
+// function getCityInfo(city){
+//   var sql = `SELECT * FROM locations WHERE search_query = '${city}';`;
+//   console.log(sql);
+//   return client.query(sql);
+//   // return client.query(sql).then().catch();
+// }
 
 
 
