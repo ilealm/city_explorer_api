@@ -27,47 +27,46 @@ app.use(errorIrisRulesTheWorld); //to tell express to use this function. Is for 
 // get the data from (file | API) and send it the front end
 // the endpoint lives un the URL last part
 app.get('/location',(request, response) => {
-  let city = request.query.city;
+  let city = request.query.city.toLowerCase();
   if ((city === '') || (city === null))
     throw 'Not a valid city';
   console.log('You requested on city: ', city);
 
   // review if city exists in table locations, if so, we retrieve the info
-  let cityObj = getCityInfo(city);
-  console.log('Retrieveing city info from BD');
-  console.log(cityObj);
-  if (cityObj === null)
-  {
-    console.log('the city is NOT in BD')
-  }
-  else{
-    console.log('the city IS in BD')
-  }
-
-  // if the location does't exist in the table locations
-  // console.log('geoKey: ', process.env.GEOCODE_API_KEY);
-  // create url from where we are getting the data using superagent API
-  let url = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE_API_KEY}&q=${city}&format=json`;
-  superAgent.get(url)
-    .then(superAgentResults =>{
-      console.log(superAgentResults.body[0]);
-      let location = new Location(superAgentResults.body[0]);
-      console.log(Location);
-      // try insert in table
-      response.send(location);
+  var sql = 'SELECT * FROM locations WHERE search_query =$1';
+  let safeValues = [city];
+  client.query(sql,safeValues)
+    .then(results =>{
+      if (results.rows.length>0) {
+        console.log ('I found the city on the data base');
+        console.log ('and this is the info to display');
+        console.log (results.rows[0]);
+        response.send(results.rows[0]);
+      }
+      else {
+        console.log ('I DO NOT found the city on the data base');
+        // if the location does't exist in the table locations, geting data using superagent API
+        let url = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE_API_KEY}&q=${city}&format=json`;
+        superAgent.get(url)
+          .then(superAgentResults =>{
+            let location = new Location(superAgentResults.body[0],city);
+            console.log(location);
+            // try insert in table
+            sql = 'INSERT INTO locations (search_query, formatted_query, latitude,longitude) VALUES ($1, $2, $3, $4);';
+            safeValues = [location.search_query, location.search_query, location.latitude, location.longitude];
+            console.log('Now inserting these values into DB');
+            console.log(sql,safeValues);
+            client.query(sql,safeValues);
+            response.status(200).send(location);
+          })
+          .catch(err => console.log(err));
+      }
     })
-    .catch(err => console.log(err));
-  // THIS WORKS PERFECT, BUT REACH FOR INFO IN A FILE INSTED USING AN API
-  // //get data from geo.json file
-  // let geo = require('./data/geo.json');
-  // let location = new Location(geo[0], city);
-  // response.send(location);
-  // Get data from iqLocations using superAgent to handle the info
 })
 
 // create the Location object
 function Location(obj, city){
-  this.search_query = city;
+  this.search_query = city; //TODO: toLowerCases
   this.formatted_query = obj.display_name;
   this.latitude = obj.lat;
   this.longitude = obj.lon;
@@ -88,15 +87,6 @@ app.get('/weather',(request, response) => {
     })
     .catch(err => console.log(err));
 
-  // this ways return info from a json 
-  // let weatherData = require('./data/darksky.json'); //get the info from the json file
-  // if ((weatherData === '') || (weatherData === null))
-  //   throw 'Not a valid weather';   
-  // let arrAllweather = weatherData.daily.data.map(weatherElement =>{
-  //   return (new Weather(weatherElement));
-  // });
-
-  // response.send(arrAllweather); // here is where we have to send an araray of objects
 })
 
 // create the Location object
@@ -134,11 +124,6 @@ function Trail(obj){
 }
 
 
-function getCityInfo(city){ 
-  var sql = `SELECT * FROM locations WHERE search_query = "${city}";`;
-  console.log(sql);
-  // return client.query(sql).then().catch();
-}
 
 
 
@@ -170,3 +155,21 @@ function errorIrisRulesTheWorld (err, req, res, next) {
 app.get('*',(request,response)=>{
   response.status(500).send('I could not find the page you are looking for'); // the function is going to return this line
 });
+
+
+// THIS WORKS PERFECT, BUT REACH FOR INFO IN A FILE INSTED USING AN API
+// //get data from geo.json file
+// let geo = require('./data/geo.json');
+// let location = new Location(geo[0], city);
+// response.send(location);
+// Get data from iqLocations using superAgent to handle the info
+
+
+// this ways return info from a json WORKS FINE. LEAVE JUST A REFERENCE
+// let weatherData = require('./data/darksky.json'); //get the info from the json file
+// if ((weatherData === '') || (weatherData === null))
+//   throw 'Not a valid weather';   
+// let arrAllweather = weatherData.daily.data.map(weatherElement =>{
+//   return (new Weather(weatherElement));
+// });
+// response.send(arrAllweather); // here is where we have to send an araray of objects
