@@ -104,3 +104,13 @@ Start time: 9:10-9:40, 10-20 -10:40, 12:15 - 12:1:10
 Finish time: 
 
 Actual time needed to complete:  2
+
+# Number and name of feature: Lab09 card 2
+
+Estimate of time needed to complete: 1.15
+Start time: 7:00pm
+
+Finish time: 8:00
+
+Actual time needed to complete:  1h
+** Lena helped me with the API conection

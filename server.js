@@ -131,8 +131,6 @@ app.get('/movies',(request,response) =>{
   let url =`https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_API_KEY}&query=${city}`;
   superAgent.get(url)
     .then(superAgentResults =>{
-      // console.log('In movies');
-      // console.log(superAgentResults.body);
       let movieArray = superAgentResults.body.results;
       let returnMovieArray = movieArray.map(movie => {
         // let temp = new Movies(movie);
@@ -162,25 +160,25 @@ function Movies(obj){
 app.get('/yelp', (request, response) => {
   let city = request.query.search_query;
   const url = `https://api.yelp.com/v3/businesses/search?location=${city}`;
-  return superagent.get(url)
+  return superAgent.get(url)
     .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
     .then( data => {
       let yelpArray = data.body.businesses;
-
       let finalYelpArray = yelpArray.map(busines => {
         return new Yelp(busines);
       })
-
-      response.send(finalYelpArray);
+      response.send(finalYelpArray.slice(0,20));
     });
 
 })
 
 function Yelp(obj){
   this.name = obj.name;
+  this.image_url = obj.image_url;
+  this.price = obj.price;
+  this.rating = obj.rating;
+  this.url = obj.url;
 }
-
-
 
 //start the server. if is on, :. turn on port to listeting
 client.connect()
