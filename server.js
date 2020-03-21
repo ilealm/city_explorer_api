@@ -15,6 +15,7 @@ const client = require('./lib/client');
 const handleLocation = require('./lib/handleLocation');
 const handleWeather = require('./lib/handleWeather');
 const handleTrails = require('./lib/handleTrails');
+const handleMovies = require('./lib/handleMovies');
 
 
 
@@ -33,41 +34,10 @@ app.use(errorIrisRulesTheWorld); //to tell express to use this function. Is for 
 app.get('/location',handleLocation);
 app.get('/weather', handleWeather);
 app.get('/trails', handleTrails);
+app.get('/movies', handleMovies);
 
 
 
-
-//MOVIES PART
-app.get('/movies',(request,response) =>{
-  let city = request.query.search_query;
-  let url =`https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_API_KEY}&query=${city}`;
-  superAgent.get(url)
-    .then(superAgentResults =>{
-      let movieArray = superAgentResults.body.results;
-      let returnMovieArray = movieArray.map(movie => {
-        // let temp = new Movies(movie);
-        // console.log(temp);
-        // return temp;
-        return new Movies(movie);
-      })
-      response.status(200).send(returnMovieArray.slice(0,20));
- 
-    })
-    .catch(err =>{
-      console.log(err);
-      response.status(500).send(err);
-    });
-})
-
-function Movies(obj){
-  this.title = obj.original_title;
-  this.overview = obj.overview;
-  this.average_votes = obj.vote_average;
-  this.total_votes = obj.vote_count;
-  this.image_url = 'https://api.themoviedb.org/3' + obj.poster_path; //: '/w4oiwXS03JFyK1frv7az9ERDinn.jpg', TODO: FIX PATH
-  this.popularity = obj.popularity;
-  this.released_on = obj.release_date;
-}
 
 app.get('/yelp', (request, response) => {
   let city = request.query.search_query;
