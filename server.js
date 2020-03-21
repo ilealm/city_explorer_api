@@ -4,7 +4,7 @@ const express = require('express');
 // access all hidden variables
 require('dotenv').config(); //here we dont asing it to a variable :. we dont interact w. it. Just use it
 const cors =  require('cors');
-const superAgent = require('superagent'); //todo: intall it on terminal
+const superAgent = require('superagent');
 const pg = require('pg');
 
 // DATABASE CONECCTION TO POSTGRES
@@ -15,7 +15,7 @@ client.on('error', err => console.log(err));
 
 // GLOBAL VARIABLES
 const app = express();
-const PORT = process.env.PORT || 3001; // setting the listening port. TODO: ADDED TO HEROKU
+const PORT = process.env.PORT || 3001; // setting the listening port. 
 
 
 // MIDDLEWARE
@@ -66,7 +66,7 @@ app.get('/location',(request, response) => {
 
 // create the Location object
 function Location(obj, city){
-  this.search_query = city; //TODO: toLowerCases
+  this.search_query = city;
   this.formatted_query = obj.display_name;
   this.latitude = obj.lat;
   this.longitude = obj.lon;
@@ -89,7 +89,7 @@ app.get('/weather',(request, response) => {
 
 })
 
-// create the Location object
+// create the Weather object
 function Weather(obj){
   this.time = new Date(obj.time * 1000).toString().slice(0, 15);
   this.forecast = obj.summary;
@@ -127,14 +127,21 @@ function Trail(obj){
 
 //MOVIES PART
 app.get('/movies',(request,response) =>{
-  let url =`https://api.themoviedb.org/3/movie/550?api_key=${process.env.MOVIE_API_KEY}`;
+  let city = request.query.search_query;
+  let url =`https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_API_KEY}&query=${city}`;
   superAgent.get(url)
     .then(superAgentResults =>{
-      console.log('In movies');
-      console.log(superAgentResults.body);
-      let movie = new Movies(superAgentResults.body);
-      console.log('Created movie obj', movie);
-      response.status(200).send(movie);
+      // console.log('In movies');
+      // console.log(superAgentResults.body);
+      let movieArray = superAgentResults.body.results;
+      let returnMovieArray = movieArray.map(movie => {
+        // let temp = new Movies(movie);
+        // console.log(temp);
+        // return temp;
+        return new Movies(movie);
+      })
+      response.status(200).send(returnMovieArray.slice(0,20));
+ 
     })
     .catch(err =>{
       console.log(err);
@@ -143,25 +150,17 @@ app.get('/movies',(request,response) =>{
 })
 
 function Movies(obj){
-  this.title =  obj.original_title; //Sleepless in Seattle",
-  this.overview =  obj.overview; //A young boy who tries to set his dad up on a date after the death of his mother. He calls into a radio station to talk about his dad’s loneliness which soon leads the dad into meeting a Journalist Annie who flies to Seattle to write a story about the boy and his dad. Yet Annie ends up with more than just a story in this popular romantic comedy.",
-  this.average_votes =  obj.vote_average; //6.60",
-  this.total_votes =  obj.vote_count; //881",
-  this.image_url =  obj.poster_path; //https://image.tmdb.org/t/p/w500/afkYP15OeUOD0tFEmj6VvejuOcz.jpg",
-  this.popularity =  obj.popularity; //8.2340",
-  this.released_on =  obj.release_date; //1993-06-24"
+  this.title = obj.original_title;
+  this.overview = obj.overview;
+  this.average_votes = obj.vote_average;
+  this.total_votes = obj.vote_count;
+  this.image_url = obj.poster_path; //: '/w4oiwXS03JFyK1frv7az9ERDinn.jpg', TODO: FIX PATH
+  this.popularity = obj.popularity;
+  this.released_on = obj.release_date;
 }
 
 
-// {
-//   "title": "Sleepless in Seattle",
-//   "overview": "A young boy who tries to set his dad up on a date after the death of his mother. He calls into a radio station to talk about his dad’s loneliness which soon leads the dad into meeting a Journalist Annie who flies to Seattle to write a story about the boy and his dad. Yet Annie ends up with more than just a story in this popular romantic comedy.",
-//   "average_votes": "6.60",
-//   "total_votes": "881",
-//   "image_url": "https://image.tmdb.org/t/p/w500/afkYP15OeUOD0tFEmj6VvejuOcz.jpg",
-//   "popularity": "8.2340",
-//   "released_on": "1993-06-24"
-// },
+
 
 
 //start the server. if is on, :. turn on port to listeting
@@ -187,7 +186,8 @@ function errorIrisRulesTheWorld (err, req, res, next) {
   //res.send({ status: 500, responseText: 'Sorry, something went wrong' })
 }
 
-
+// let url = `https://api.yelp.com/v3/businesses/search?location=${city}`;
+// YELP_API_KEY=f_fX89CQmM4QCnMfpAilo7RbNmJrxbW1PfPwjEtSxgI24AALKrkXS49k1Pft8W_GzADjiZm26q4ESDtA0sceDI_ey5MqDpILSydMMCnrWCbkgaNO8-augHzvQzBUXnYx
 
 app.get('*',(request,response)=>{
   response.status(500).send('I could not find the page you are looking for'); // the function is going to return this line
@@ -195,6 +195,7 @@ app.get('*',(request,response)=>{
 
 
 // THIS WORKS PERFECT, BUT REACH FOR INFO IN A FILE INSTED USING AN API
+
 // //get data from geo.json file
 // let geo = require('./data/geo.json');
 // let location = new Location(geo[0], city);

@@ -99,8 +99,8 @@ Actual time needed to complete:  30m
 # Number and name of feature: Lab09 card 1
 
 Estimate of time needed to complete: 1.15
-Start time: 9:10-9:40, 10:-20
+Start time: 9:10-9:40, 10-20 -10:40, 12:15 - 12:1:10
 
-Finish time: 8:00
+Finish time: 
 
-Actual time needed to complete:  30m
+Actual time needed to complete:  2

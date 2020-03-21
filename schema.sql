@@ -7,7 +7,7 @@ CREATE TABLE locations (
   longitude  VARCHAR(255)
 );
 
-INSERT INTO locations (search_query, formatted_query, latitude,longitude)
-VALUES ('monterrey', 'monterrey', '25.6802019', '-100.3152586');
+-- INSERT INTO locations (search_query, formatted_query, latitude,longitude)
+-- VALUES ('monterrey', 'monterrey', '25.6802019', '-100.3152586');
 
 -- SELECT * FROM locations;
