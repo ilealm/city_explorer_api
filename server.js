@@ -4,9 +4,7 @@
 // framework(analogy: hollywood principle) / libraries
 const express = require('express');
 const app = express();
-
 const cors =  require('cors');
-// const superAgent = require('superagent');
 require('dotenv').config(); //here we dont asing it to a variable :. we dont interact w. it. Just use it
 
 
@@ -19,18 +17,16 @@ const handleMovies = require('./lib/handleMovies');
 const handleYelp = require('./lib/handleYelp');
 
 
-
-
 // GLOBAL VARIABLES
-const PORT = process.env.PORT || 3001; // setting the listening port. 
+const PORT = process.env.PORT || 3001; 
 
 
 // MIDDLEWARE
 app.use(cors()); //use is to register a middleware function
-app.use(errorIrisRulesTheWorld); //to tell express to use this function. Is for error handling. 
+app.use(errorIrisRulesTheWorld); //to tell express to use this function. Is for error handling.
+
 
 ////////  ROUTE HANDLERS
-
 app.get('/location',handleLocation);
 app.get('/weather', handleWeather);
 app.get('/trails', handleTrails);
@@ -48,12 +44,8 @@ client.connect()
     })
   });
 
-// If page not found:
-// turn this app.get into a function, the function is going to return a response status 
-// the parameter to pass to function will be what the request is
-//the function return, will be the response
+
 // https://expressjs.com/en/guide/error-handling.html
-// my error handle function. MUST BE THIS 4 parameters
 function errorIrisRulesTheWorld (err, req, res, next) {
   if (res.headersSent) {
     return next(err)
@@ -63,7 +55,7 @@ function errorIrisRulesTheWorld (err, req, res, next) {
 }
 
 app.get('*',(request,response)=>{
-  response.status(500).send('I could not find the page you are looking for'); // the function is going to return this line
+  response.status(500).send('I could not find the page you are looking for');
 });
 
 
@@ -79,7 +71,7 @@ app.get('*',(request,response)=>{
 // this ways return info from a json WORKS FINE. LEAVE JUST A REFERENCE
 // let weatherData = require('./data/darksky.json'); //get the info from the json file
 // if ((weatherData === '') || (weatherData === null))
-//   throw 'Not a valid weather';   
+//   throw 'Not a valid weather';
 // let arrAllweather = weatherData.daily.data.map(weatherElement =>{
 //   return (new Weather(weatherElement));
 // });
