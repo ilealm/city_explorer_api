@@ -11,9 +11,11 @@ require('dotenv').config(); //here we dont asing it to a variable :. we dont int
 
 
 // my Libraries
+const client = require('./lib/client');
 const handleLocation = require('./lib/handleLocation');
 const handleWeather = require('./lib/handleWeather');
-const client = require('./lib/client');
+const handleTrails = require('./lib/handleTrails');
+
 
 
 
@@ -30,58 +32,8 @@ app.use(errorIrisRulesTheWorld); //to tell express to use this function. Is for 
 
 app.get('/location',handleLocation);
 app.get('/weather', handleWeather);
+app.get('/trails', handleTrails);
 
-
-
-// WEATHER PART
-// app.get('/weather',(request, response) => {
-
-//   // obtaining the info from darkSkyAPI using superagent
-//   let url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.latitude},${request.query.longitude}`;
-//   superAgent.get(url)
-//     .then(superAgentResults =>{
-//       let arrAllweather = superAgentResults.body.daily.data.map(weatherElement =>{
-//         return (new Weather(weatherElement));
-//       });
-//       response.send(arrAllweather); // here is where we have to send an araray of objects
-//     })
-//     .catch(err => console.log(err));
-
-// })
-
-// // create the Weather object
-// function Weather(obj){
-//   this.time = new Date(obj.time * 1000).toString().slice(0, 15);
-//   this.forecast = obj.summary;
-// }
-
-
-//TRAILS PART
-app.get('/trails',(request, response) => {
-  let url =`https://www.hikingproject.com/data/get-trails?lat=${request.query.latitude}&lon=${request.query.longitude}&maxDistance=10&key=${process.env.TRAIL_API_KEY}`;
-  superAgent.get(url)
-    .then(superAgentResults => {
-      let arrAllTrails = superAgentResults.body.trails.map(trail => new Trail(trail));
-      response.status(200).send(arrAllTrails);
-    })
-    .catch(err => {
-      console.log(err)
-      response.status(500).send(err);
-    });
-})
-
-function Trail(obj){
-  this.name = obj.name;
-  this.location = obj.location;
-  this.length = obj.length;
-  this.stars = obj.stars;
-  this.star_votes = obj.starVotes;
-  this.summary = obj.summary;
-  this.trail_url = obj.url;
-  this.conditions = obj.conditionStatus;
-  this.condition_date = new Date(obj.conditionDate).toString().slice(0, 15);
-  this.condition_time = new Date(obj.conditionDate).toString().slice(16,25);
-}
 
 
 
