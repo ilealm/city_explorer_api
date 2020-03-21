@@ -12,6 +12,7 @@ require('dotenv').config(); //here we dont asing it to a variable :. we dont int
 
 // my Libraries
 const handleLocation = require('./lib/handleLocation');
+const handleWeather = require('./lib/handleWeather');
 const client = require('./lib/client');
 
 
@@ -28,31 +29,31 @@ app.use(errorIrisRulesTheWorld); //to tell express to use this function. Is for 
 ////////  ROUTE HANDLERS
 
 app.get('/location',handleLocation);
-
+app.get('/weather', handleWeather);
 
 
 
 // WEATHER PART
-app.get('/weather',(request, response) => {
+// app.get('/weather',(request, response) => {
 
-  // obtaining the info from darkSkyAPI using superagent
-  let url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.latitude},${request.query.longitude}`;
-  superAgent.get(url)
-    .then(superAgentResults =>{
-      let arrAllweather = superAgentResults.body.daily.data.map(weatherElement =>{
-        return (new Weather(weatherElement));
-      });
-      response.send(arrAllweather); // here is where we have to send an araray of objects
-    })
-    .catch(err => console.log(err));
+//   // obtaining the info from darkSkyAPI using superagent
+//   let url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.latitude},${request.query.longitude}`;
+//   superAgent.get(url)
+//     .then(superAgentResults =>{
+//       let arrAllweather = superAgentResults.body.daily.data.map(weatherElement =>{
+//         return (new Weather(weatherElement));
+//       });
+//       response.send(arrAllweather); // here is where we have to send an araray of objects
+//     })
+//     .catch(err => console.log(err));
 
-})
+// })
 
-// create the Weather object
-function Weather(obj){
-  this.time = new Date(obj.time * 1000).toString().slice(0, 15);
-  this.forecast = obj.summary;
-}
+// // create the Weather object
+// function Weather(obj){
+//   this.time = new Date(obj.time * 1000).toString().slice(0, 15);
+//   this.forecast = obj.summary;
+// }
 
 
 //TRAILS PART
