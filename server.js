@@ -6,7 +6,7 @@ const express = require('express');
 const app = express();
 
 const cors =  require('cors');
-const superAgent = require('superagent');
+// const superAgent = require('superagent');
 require('dotenv').config(); //here we dont asing it to a variable :. we dont interact w. it. Just use it
 
 
@@ -16,7 +16,7 @@ const handleLocation = require('./lib/handleLocation');
 const handleWeather = require('./lib/handleWeather');
 const handleTrails = require('./lib/handleTrails');
 const handleMovies = require('./lib/handleMovies');
-
+const handleYelp = require('./lib/handleYelp');
 
 
 
@@ -35,32 +35,9 @@ app.get('/location',handleLocation);
 app.get('/weather', handleWeather);
 app.get('/trails', handleTrails);
 app.get('/movies', handleMovies);
+app.get('/yelp', handleYelp);
 
 
-
-
-app.get('/yelp', (request, response) => {
-  let city = request.query.search_query;
-  const url = `https://api.yelp.com/v3/businesses/search?location=${city}`;
-  return superAgent.get(url)
-    .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
-    .then( data => {
-      let yelpArray = data.body.businesses;
-      let finalYelpArray = yelpArray.map(busines => {
-        return new Yelp(busines);
-      })
-      response.send(finalYelpArray.slice(0,20));
-    });
-
-})
-
-function Yelp(obj){
-  this.name = obj.name;
-  this.image_url = obj.image_url;
-  this.price = obj.price;
-  this.rating = obj.rating;
-  this.url = obj.url;
-}
 
 // //start the server. if is on, :. turn on port to listeting
 client.connect()
