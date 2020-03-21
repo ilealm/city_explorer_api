@@ -159,7 +159,26 @@ function Movies(obj){
   this.released_on = obj.release_date;
 }
 
+app.get('/yelp', (request, response) => {
+  let city = request.query.search_query;
+  const url = `https://api.yelp.com/v3/businesses/search?location=${city}`;
+  return superagent.get(url)
+    .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
+    .then( data => {
+      let yelpArray = data.body.businesses;
 
+      let finalYelpArray = yelpArray.map(busines => {
+        return new Yelp(busines);
+      })
+
+      response.send(finalYelpArray);
+    });
+
+})
+
+function Yelp(obj){
+  this.name = obj.name;
+}
 
 
 
