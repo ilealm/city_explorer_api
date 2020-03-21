@@ -1,20 +1,23 @@
 'use strict';
+
+
 // framework(analogy: hollywood principle) / libraries
 const express = require('express');
-// access all hidden variables
-require('dotenv').config(); //here we dont asing it to a variable :. we dont interact w. it. Just use it
+const app = express();
+
 const cors =  require('cors');
 const superAgent = require('superagent');
-const pg = require('pg');
+require('dotenv').config(); //here we dont asing it to a variable :. we dont interact w. it. Just use it
 
-// DATABASE CONECCTION TO POSTGRES
-const client = new pg.Client(process.env.DATABASE_URL);
-client.on('error', err => console.log(err));
+
+// my Libraries
+const handleLocation = require('./lib/handleLocation');
+const client = require('./lib/client');
+
 
 
 
 // GLOBAL VARIABLES
-const app = express();
 const PORT = process.env.PORT || 3001; // setting the listening port. 
 
 
@@ -23,54 +26,10 @@ app.use(cors()); //use is to register a middleware function
 app.use(errorIrisRulesTheWorld); //to tell express to use this function. Is for error handling. 
 
 ////////  ROUTE HANDLERS
-// LOCATION PART
-// get the data from (file | API) and send it the front end
-// the endpoint lives un the URL last part
-app.get('/location',(request, response) => {
-  let city = request.query.city.toLowerCase();
-  if ((city === '') || (city === null))
-    throw 'Not a valid city';
-  // console.log('You requested on city: ', city);
 
-  // review if city exists in table locations, if so, we retrieve the info
-  var sql = 'SELECT * FROM locations WHERE search_query =$1';
-  let safeValues = [city];
-  client.query(sql,safeValues)
-    .then(results =>{
-      if (results.rows.length>0) {
-        // console.log ('I found the city on the data base');
-        // console.log ('and this is the info to display');
-        // console.log (results.rows[0]);
-        response.send(results.rows[0]);
-      }
-      else {
-        // console.log ('I DO NOT found the city on the data base');
-        // if the location does't exist in the table locations, geting data using superagent API
-        let url = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE_API_KEY}&q=${city}&format=json`;
-        superAgent.get(url)
-          .then(superAgentResults =>{
-            let location = new Location(superAgentResults.body[0],city);
-            // console.log(location);
-            // try insert in table
-            sql = 'INSERT INTO locations (search_query, formatted_query, latitude,longitude) VALUES ($1, $2, $3, $4);';
-            safeValues = [location.search_query, location.search_query, location.latitude, location.longitude];
-            // console.log('Now inserting these values into DB');
-            // console.log(sql,safeValues);
-            client.query(sql,safeValues);
-            response.status(200).send(location);
-          })
-          .catch(err => console.log(err));
-      }
-    })
-})
+app.get('/location',handleLocation);
 
-// create the Location object
-function Location(obj, city){
-  this.search_query = city;
-  this.formatted_query = obj.display_name;
-  this.latitude = obj.lat;
-  this.longitude = obj.lon;
-}
+
 
 
 // WEATHER PART
@@ -152,7 +111,7 @@ function Movies(obj){
   this.overview = obj.overview;
   this.average_votes = obj.vote_average;
   this.total_votes = obj.vote_count;
-  this.image_url = obj.poster_path; //: '/w4oiwXS03JFyK1frv7az9ERDinn.jpg', TODO: FIX PATH
+  this.image_url = 'https://api.themoviedb.org/3' + obj.poster_path; //: '/w4oiwXS03JFyK1frv7az9ERDinn.jpg', TODO: FIX PATH
   this.popularity = obj.popularity;
   this.released_on = obj.release_date;
 }
@@ -180,7 +139,7 @@ function Yelp(obj){
   this.url = obj.url;
 }
 
-//start the server. if is on, :. turn on port to listeting
+// //start the server. if is on, :. turn on port to listeting
 client.connect()
   .then( () =>{
     // Turn on the server to listening
@@ -202,9 +161,6 @@ function errorIrisRulesTheWorld (err, req, res, next) {
   res.status(500).send({ status: 500, responseText: 'Sorry, something went wrong' })
   //res.send({ status: 500, responseText: 'Sorry, something went wrong' })
 }
-
-// let url = `https://api.yelp.com/v3/businesses/search?location=${city}`;
-// YELP_API_KEY=f_fX89CQmM4QCnMfpAilo7RbNmJrxbW1PfPwjEtSxgI24AALKrkXS49k1Pft8W_GzADjiZm26q4ESDtA0sceDI_ey5MqDpILSydMMCnrWCbkgaNO8-augHzvQzBUXnYx
 
 app.get('*',(request,response)=>{
   response.status(500).send('I could not find the page you are looking for'); // the function is going to return this line
