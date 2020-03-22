@@ -114,3 +114,12 @@ Finish time: 8:00
 
 Actual time needed to complete:  1h
 ** Lena helped me with the API conection
+
+# Number and name of feature: Lab09 card 3
+
+Estimate of time needed to complete: 1.30
+Start time: 3:00pm
+
+Finish time: 4:10pb
+
+Actual time needed to complete:  1.10h
